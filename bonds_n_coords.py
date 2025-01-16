@@ -58,7 +58,7 @@ def lat_bonds(Nx,Ny):
             b=[i,i+Ny]
             bond.append(b)
             bonds.append(b)
-    #I added this part to remove simillar elements from bond (only happens for Ny = 2)
+    #I added this part to remove simillar elements from bond 
     unique_bond=sorted(set(tuple(b) for b in bond))
     return unique_bond, bonds     #bond for cylindrical bc and bonds for open
 
