@@ -4,13 +4,13 @@ import matplotlib.pyplot as pylab
 import sys
 import copy
 from bonds_n_coords import lat_bonds #triangular lattice rectangular geometery
-
+from bonds_n_coords_diagonal import diagonal_lat_bonds #triangular lattice diagonal geometery
 # This is for Hubbard Hamiltoinian
 # Mean Field Hamiltonian is H= KT + U sum_i ( <niup>nidn + niup<nidn> - <niup><nidn> - <Splusi>Sminsi - Splusi<Sminusi> + <Splusi><Sminsi> )
 # filling = 1 means half filling
 # trying with 4 sites triangular 2 ups 1 dn and 1 hole will generalize later
-if len(sys.argv) == 1:
-    print('Provide inputs: Nx Ny filling float U')
+if len(sys.argv) < 6:
+    print('Provide inputs: Nx Ny filling string geometery float U')
     sys.exit(1)
 Nx = int(sys.argv[1])
 Ny = int(sys.argv[2])
@@ -18,10 +18,14 @@ N = Nx * Ny
 filling = float(sys.argv[3])
 Np = int(filling * N)
 Nh = N - Np
-U = float(sys.argv[4])
+geometery = sys.argv[4]
+U = float(sys.argv[5])
 t = 1
-#print(Np)
-bonds, open_bonds = lat_bonds(Nx,Ny)
+
+if geometery == 'diagonal':
+    bonds, open_bonds = diagonal_lat_bonds(Nx,Ny)
+else:    
+    bonds, open_bonds = lat_bonds(Nx,Ny)
 #-------------------------------------------------------------------------------------------------------------------------------------------
 def fix_bonds(bonds): #this is different from my other fix_bonds function it depends on if it is (1up 2up ... 1dn 2dn ...) or (1up 1dn 2up 2dn ............) this one is for (1up 2up ......)
     for i in range(len(bonds)):
