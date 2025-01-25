@@ -8,7 +8,6 @@ from bonds_n_coords_diagonal import diagonal_lat_bonds #triangular lattice diago
 # This is for Hubbard Hamiltoinian
 # Mean Field Hamiltonian is H= KT + U sum_i ( <niup>nidn + niup<nidn> - <niup><nidn> - <Splusi>Sminsi - Splusi<Sminusi> + <Splusi><Sminsi> )
 # filling = 1 means half filling
-# trying with 4 sites triangular 2 ups 1 dn and 1 hole will generalize later
 if len(sys.argv) < 6:
     print('Provide inputs: Nx Ny filling string geometery float U')
     sys.exit(1)
