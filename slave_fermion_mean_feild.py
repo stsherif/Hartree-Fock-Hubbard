@@ -46,11 +46,11 @@ def sfmf (bonds, bs, fs):
     Hamiltonianf = np.zeros((N,N))
     Hamiltonianb = np.zeros((2*N,2*N))
     for i in range(len(bonds)):
-         Hamiltonianf[bonds[i][0]-1][bonds[i][1]-1] = -t * bs[bonds[i][0]-1][bonds[i][1]-1]
-         Hamiltonianf[bonds[i][1]-1][bonds[i][0]-1] = -t * bs[bonds[i][1]-1][bonds[i][0]-1]
+         Hamiltonianf[bonds[i][0]-1][bonds[i][1]-1] = t * bs[bonds[i][0]-1][bonds[i][1]-1]
+         Hamiltonianf[bonds[i][1]-1][bonds[i][0]-1] = t * bs[bonds[i][1]-1][bonds[i][0]-1]
     for j in range(len(fixed_bonds)):
-        Hamiltonianb[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1] = -t * fs[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1]
-        Hamiltonianb[fixed_bonds[j][1]-1][fixed_bonds[j][0]-1] = -t * fs[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1]
+        Hamiltonianb[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1] = t * fs[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1]
+        Hamiltonianb[fixed_bonds[j][1]-1][fixed_bonds[j][0]-1] = t * fs[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1]
     #print("Hf", Hamiltonianf)
     #print("Hb", Hamiltonianb)
     eigenvaluesf, eigenvectorsf = np.linalg.eigh(Hamiltonianf)
