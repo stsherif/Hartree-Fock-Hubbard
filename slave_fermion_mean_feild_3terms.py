@@ -41,20 +41,23 @@ def is_hermitian(matrix):
         return np.allclose(matrix, matrix.conj().T)
 #------------------------------------------------------------------------
 def sfmf (bonds, bs, fs):
-    fixed_bonds = fix_bonds(bonds) 
     N = max(max(bonds))
     Hamiltonianf = np.zeros((N,N))
-    Hamiltonianb = np.zeros((2*N,2*N))
+    Hamiltonianbup = np.zeros((N,N))
+    Hamiltonianbdn = np.zeros((N,N))
     for i in range(len(bonds)):
          Hamiltonianf[bonds[i][0]-1][bonds[i][1]-1] = t * bs[bonds[i][0]-1][bonds[i][1]-1]
          Hamiltonianf[bonds[i][1]-1][bonds[i][0]-1] = t * bs[bonds[i][1]-1][bonds[i][0]-1]
-    for j in range(len(fixed_bonds)):
-        Hamiltonianb[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1] = t * fs[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1]
-        Hamiltonianb[fixed_bonds[j][1]-1][fixed_bonds[j][0]-1] = t * fs[fixed_bonds[j][0]-1][fixed_bonds[j][1]-1]
+    for j in range(len(bonds)):
+        Hamiltonianbup[bonds[j][0]-1][bonds[j][1]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
+        Hamiltonianbup[bonds[j][1]-1][bonds[j][0]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
+        Hamiltonianbdn[bonds[j][0]-1][bonds[j][1]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
+        Hamiltonianbdn[bonds[j][1]-1][bonds[j][0]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
     #print("Hf", Hamiltonianf)
     #print("Hb", Hamiltonianb)
     eigenvaluesf, eigenvectorsf = np.linalg.eigh(Hamiltonianf)
-    eigenvaluesb, eigenvectorsb = np.linalg.eigh(Hamiltonianb)
+    eigenvaluesbup, eigenvectorsbup = np.linalg.eigh(Hamiltonianbup)
+    eigenvaluesbdn, eigenvectorsbdn = np.linalg.eigh(Hamiltonianbdn)
     '''
     print('vecf',eigenvectorsf)
     print('valf',eigenvaluesf)
@@ -62,7 +65,7 @@ def sfmf (bonds, bs, fs):
     print('valb',eigenvaluesb)
     '''
     #print(eigenvectors[0][1])#, "    ", eigenvectors[0,1])
-    total_energy = eigenvaluesb[0] * Np
+    total_energy = eigenvaluesbup[0] * Np * 0.5 + eigenvaluesbdn[0] * Np * 0.5  #50upand50dn
     for i in range(Nh):
         total_energy += eigenvaluesf[i]
     #------------------------------------Find the new prameters--------------------------------------------
@@ -72,28 +75,25 @@ def sfmf (bonds, bs, fs):
         for j in range(N):
              for k in range(Nh):
                     fs_new[i][j] += (eigenvectorsf[i][k] * (eigenvectorsf[j][k].conj())).real
-    #make fs into (2*N x 2*N)
-    fs_new_extented = np.zeros((2*N,2*N))
-    fs_new_extented[:N, :N] = fs_new
-    fs_new_extented[N:, N:] = fs_new
     for i in range(N):
         for j in range(N):
-            bs_new[i][j] = eigenvectorsb[i][0] * (eigenvectorsb[j][0]).conj() + eigenvectorsb[i+N][0] * (eigenvectorsb[j+N][0].conj())
+            bs_new[i][j] = eigenvectorsbup[i][0] * (eigenvectorsbup[j][0]).conj() + eigenvectorsbdn[i][0] * (eigenvectorsbdn[j][0].conj())
 
-    return total_energy, bs_new, fs_new_extented         
+    return total_energy, bs_new, fs_new         
 #-------------------------------------------------------------------------------------------------------------------------------
 #make symmetric matrix
 def make_sym(matrix):
     return (matrix + matrix.T) / 2
 #---------------------------------------------------------------------------------
 min_energy = 1000
-for seed in range(20):
+for seed in range(200):
        np.random.seed(seed)
        #------------------------Making up the random intial obeservables--------
        bs_intial = np.random.rand(N,N)
        fs_intial = np.random.rand(N,N)
        fs_intial = make_sym(fs_intial)
        bs_intial = make_sym(bs_intial)
+       '''
        sumh = 0
        sump = 0
        for i in range(N):
@@ -103,16 +103,14 @@ for seed in range(20):
            for j in range(N):
                bs_intial[i][j] = bs_intial[i][j] * Np / sump
                fs_intial[i][j] = fs_intial[i][j] * Nh / sumh
+       '''
        #print('fsin',fs_intial)
        #print('bsin',bs_intial)
-       fs_intial_extented = np.zeros((2*N,2*N))
-       fs_intial_extented[:N, :N] = fs_intial
-       fs_intial_extented[N:, N:] = fs_intial
        bs = copy.deepcopy(bs_intial)
-       fs = copy.deepcopy(fs_intial_extented)
+       fs = copy.deepcopy(fs_intial)
        #print('fsinex',fs)
        print('new seed')
-       for iteration in range(20):
+       for iteration in range(40):
             bs_old = copy.deepcopy(bs)
             fs_old = copy.deepcopy(fs)
             total_energy, bs_new, fs_new = sfmf (bonds, bs, fs)
