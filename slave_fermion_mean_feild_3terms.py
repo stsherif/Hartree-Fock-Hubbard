@@ -22,21 +22,18 @@ Nh = N - Np
 geometery = sys.argv[4]
 t = 1
 
+#---------------------------------------------------------------------
+def print_matrix(matrix, decimal_points):
+    for row in matrix:
+        formating = f"{{:.{decimal_points}f}}"
+        print(" ".join(formating.format(float(elem)) for elem in row))
+#--------------------------------------------------------------------------
+
 if geometery == 'diagonal':
     bonds, open_bonds = diagonal_lat_bonds(Nx,Ny)
 else:    
     bonds, open_bonds = lat_bonds(Nx,Ny)
 #-------------------------------------------------------------------------------------------------------------------------------------------
-def fix_bonds(bonds): #this is different from my other fix_bonds function it depends on if it is (1up 2up ... 1dn 2dn ...) or (1up 1dn 2up 2dn ............) this one is for (1up 2up ......)
-    fixed_bonds=copy.deepcopy(bonds)
-    for i in range(len(bonds)):
-        fixed_bonds.append([bonds[i][0]+N,bonds[i][1]+N])
-    return fixed_bonds
-fixed_bonds = fix_bonds(bonds)
-print("bonds = ",bonds)
-print("fixed_bonds = ",fixed_bonds)
-#print(max(max(bonds)))
-#------------------------------------------------------------------------
 def is_hermitian(matrix):
         return np.allclose(matrix, matrix.conj().T)
 #------------------------------------------------------------------------
@@ -50,9 +47,9 @@ def sfmf (bonds, bs, fs):
          Hamiltonianf[bonds[i][1]-1][bonds[i][0]-1] = t * bs[bonds[i][1]-1][bonds[i][0]-1]
     for j in range(len(bonds)):
         Hamiltonianbup[bonds[j][0]-1][bonds[j][1]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
-        Hamiltonianbup[bonds[j][1]-1][bonds[j][0]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
+        Hamiltonianbup[bonds[j][1]-1][bonds[j][0]-1] = t * fs[bonds[j][1]-1][bonds[j][0]-1]
         Hamiltonianbdn[bonds[j][0]-1][bonds[j][1]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
-        Hamiltonianbdn[bonds[j][1]-1][bonds[j][0]-1] = t * fs[bonds[j][0]-1][bonds[j][1]-1]
+        Hamiltonianbdn[bonds[j][1]-1][bonds[j][0]-1] = t * fs[bonds[j][1]-1][bonds[j][0]-1]
     #print("Hf", Hamiltonianf)
     #print("Hb", Hamiltonianb)
     eigenvaluesf, eigenvectorsf = np.linalg.eigh(Hamiltonianf)
@@ -64,7 +61,6 @@ def sfmf (bonds, bs, fs):
     print('vecb',eigenvectorsb)
     print('valb',eigenvaluesb)
     '''
-    #print(eigenvectors[0][1])#, "    ", eigenvectors[0,1])
     total_energy = eigenvaluesbup[0] * Np * 0.5 + eigenvaluesbdn[0] * Np * 0.5  #50upand50dn
     for i in range(Nh):
         total_energy += eigenvaluesf[i]
@@ -86,13 +82,13 @@ def make_sym(matrix):
     return (matrix + matrix.T) / 2
 #---------------------------------------------------------------------------------
 min_energy = 1000
-for seed in range(200):
+for seed in range(2):
        np.random.seed(seed)
        #------------------------Making up the random intial obeservables--------
        bs_intial = np.random.rand(N,N)
        fs_intial = np.random.rand(N,N)
-       fs_intial = make_sym(fs_intial)
-       bs_intial = make_sym(bs_intial)
+       #fs_intial = make_sym(fs_intial) #It actually fixs itself into symmertic
+       #bs_intial = make_sym(bs_intial)
        '''
        sumh = 0
        sump = 0
@@ -110,12 +106,12 @@ for seed in range(200):
        fs = copy.deepcopy(fs_intial)
        #print('fsinex',fs)
        print('new seed')
-       for iteration in range(40):
+       for iteration in range(10):
             bs_old = copy.deepcopy(bs)
             fs_old = copy.deepcopy(fs)
             total_energy, bs_new, fs_new = sfmf (bonds, bs, fs)
             print("E = ", total_energy)
-            if total_energy < min_energy and iteration > 10:
+            if total_energy < min_energy and iteration > 5:
                 min_energy = total_energy
             for i in range(N):
                 for j in range(N):
@@ -125,8 +121,10 @@ for seed in range(200):
        #print('E = ',total_energy)         
 print('--------------------------------------------------------')
 print('min energy',min_energy)
-print("bs = ",bs_new)
-print("fs = ",fs_new)
+print("bs = ")
+print_matrix(bs,8)
+print("fs = ")
+print_matrix(fs,8)
 #Nb = sum(bs_new)       
 #Nf = sum(fs_new)  
 #print("Nup = ",Nb,'   ','Ndn = ',Nf,'   ','Np = ',Nb+Nf)

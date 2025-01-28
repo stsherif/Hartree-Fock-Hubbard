@@ -21,7 +21,12 @@ Np = int(filling * N)
 Nh = N - Np
 geometery = sys.argv[4]
 t = 1
-
+#---------------------------------------------------------------------
+def print_matrix(matrix, decimal_points):
+    for row in matrix:
+        formating = f"{{:.{decimal_points}f}}"
+        print(" ".join(formating.format(float(elem)) for elem in row))
+#--------------------------------------------------------------------------
 if geometery == 'diagonal':
     bonds, open_bonds = diagonal_lat_bonds(Nx,Ny)
 else:    
@@ -87,13 +92,14 @@ def make_sym(matrix):
     return (matrix + matrix.T) / 2
 #---------------------------------------------------------------------------------
 min_energy = 1000
-for seed in range(20):
+for seed in range(2):
        np.random.seed(seed)
        #------------------------Making up the random intial obeservables--------
        bs_intial = np.random.rand(N,N)
        fs_intial = np.random.rand(N,N)
        fs_intial = make_sym(fs_intial)
        bs_intial = make_sym(bs_intial)
+       '''
        sumh = 0
        sump = 0
        for i in range(N):
@@ -103,6 +109,7 @@ for seed in range(20):
            for j in range(N):
                bs_intial[i][j] = bs_intial[i][j] * Np / sump
                fs_intial[i][j] = fs_intial[i][j] * Nh / sumh
+       '''
        #print('fsin',fs_intial)
        #print('bsin',bs_intial)
        fs_intial_extented = np.zeros((2*N,2*N))
@@ -112,12 +119,12 @@ for seed in range(20):
        fs = copy.deepcopy(fs_intial_extented)
        #print('fsinex',fs)
        print('new seed')
-       for iteration in range(20):
+       for iteration in range(10):
             bs_old = copy.deepcopy(bs)
             fs_old = copy.deepcopy(fs)
             total_energy, bs_new, fs_new = sfmf (bonds, bs, fs)
             print("E = ", total_energy)
-            if total_energy < min_energy and iteration > 10:
+            if total_energy < min_energy and iteration > 5:
                 min_energy = total_energy
             for i in range(N):
                 for j in range(N):
@@ -127,8 +134,10 @@ for seed in range(20):
        #print('E = ',total_energy)         
 print('--------------------------------------------------------')
 print('min energy',min_energy)
-print("bs = ",bs_new)
-print("fs = ",fs_new)
+print("bs = ")
+print_matrix(bs_new,8)
+print("fs = ")
+print_matrix(fs_new,8)
 #Nb = sum(bs_new)       
 #Nf = sum(fs_new)  
 #print("Nup = ",Nb,'   ','Ndn = ',Nf,'   ','Np = ',Nb+Nf)
