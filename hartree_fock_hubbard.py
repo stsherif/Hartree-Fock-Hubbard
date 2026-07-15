@@ -94,7 +94,7 @@ for seed in range(50):
             nups_intial[i] = nups_intial[i] *math.ceil((0.5) *Np) / sumups
             ndns_intial[i] = ndns_intial[i] *math.floor((0.5) *Np) / sumdns
        mags_for_spluss = np.random.rand(N)
-       angles_for_spluss = np.random.rand(N) * 2 * np.pi # This is just to creat complex spluss with abs value = 1
+       angles_for_spluss = np.random.rand(N) * 2 * np.pi # This is just to create complex spluss with abs value = 1
        spluss_intial = mags_for_spluss * (np.cos(angles_for_spluss) + 1j * np.sin(angles_for_spluss))
        #print('intial up', sum(nups_intial))
        #print('intial dn', sum(ndns_intial))
